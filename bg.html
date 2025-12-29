@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;900&display=swap');
+
+        /* --- GLOBAL & SCROLL --- */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #fff; border-radius: 10px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; user-select: none; }
+
+        :root {
+            --body-bg: #000;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.05);
+            scroll-behavior: smooth;
+        }
+
+        body { background-color: var(--body-bg); font-family: 'Montserrat', sans-serif; color: white; overflow-x: hidden; }
+
+        /* --- ASCENSION LOADER --- */
+        #pre-load { 
+            background: #000; position: fixed; inset: 0; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 999999; transition: transform 1.2s cubic-bezier(1, 0, 0, 1);
+        }
+        #pre-load.fade-out { transform: translateY(-100%); }
+        .load-counter { font-size: 8rem; font-weight: 900; letter-spacing: -5px; }
+        .load-bar-wrap { width: 200px; height: 1px; background: rgba(255,255,255,0.1); margin-top: 20px; overflow: hidden; }
+        .load-bar-fill { height: 100%; background: #fff; width: 0%; }
+
+        /* --- CURSOR --- */
+        #cursor-dot { position: fixed; width: 6px; height: 6px; background: #fff; border-radius: 50%; pointer-events: none; z-index: 1000001; transform: translate(-50%, -50%); }
+        #cursor-outline { position: fixed; width: 35px; height: 35px; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; pointer-events: none; z-index: 1000000; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, background 0.3s; }
+        body.hovering #cursor-outline { width: 80px; height: 80px; background: #fff; mix-blend-mode: difference; }
+
+        /* --- MAGNETIC NAV --- */
+        header { position: fixed; top: 40px; width: 100%; display: flex; justify-content: center; z-index: 1000; pointer-events: none; }
+        .nav-island { background: rgba(15, 15, 15, 0.4); backdrop-filter: blur(30px); border-radius: 100px; border: 1px solid var(--border); padding: 8px 12px; display: flex; pointer-events: auto; transition: transform 0.2s; }
+        .nav-item { padding: 12px 25px; color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 10px; font-weight: 900; letter-spacing: 2px; transition: 0.3s; border-radius: 50px; }
+        .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); }
+
+        /* --- LAYOUT --- */
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        section { position: relative; width: 100%; padding: 120px 10%; z-index: 5; }
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .slogan { font-size: clamp(3rem, 15vw, 11rem); font-weight: 900; letter-spacing: -5px; line-height: 0.9; text-align: center; }
+
+        /* --- ABOUT & RESUME --- */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
+        .resume-btn { position: relative; display: inline-flex; align-items: center; padding: 18px 40px; border: 1px solid #fff; color: #fff; font-size: 11px; font-weight: 900; letter-spacing: 3px; text-decoration: none; overflow: hidden; transition: 0.4s; }
+        .resume-btn:hover { color: #000; }
+        .resume-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: #fff; transition: transform 0.6s cubic-bezier(0.83, 0, 0.17, 1); z-index: -1; }
+        .resume-btn:hover::before { transform: translateX(100%); }
+
+        /* --- PROJECT GRID --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 50px; }
+        .card { background: var(--glass); border: 1px solid var(--border); padding: 40px; border-radius: 30px; transition: 0.5s; position: relative; overflow: hidden; }
+        .card:hover { border-color: #fff; transform: translateY(-10px); }
+
+        /* --- MODAL / APPS --- */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(50px); z-index: 2000; display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.5s; }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: #000; border: 1px solid #333; padding: 30px; border-radius: 30px; width: 95%; max-width: 400px; text-align: center; }
+        .app-btn { width: 100%; padding: 15px; margin-top: 10px; background: #fff; color: #000; border: none; font-weight: 900; border-radius: 12px; }
+
+        /* FULL CALC STYLES */
+        #calc-screen { width: 100%; background: transparent; border: none; padding: 10px; color: #fff; font-size: 3rem; text-align: right; margin-bottom: 10px; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .c-btn { aspect-ratio: 1; border-radius: 50%; border: none; background: #333; color: #fff; font-weight: 900; font-size: 1.2rem; }
+        .c-btn.op { background: #ff9f0a; }
+
+        .hidden-credit { display: none; }
+    </style>
+</head>
+<body onclick="handleGlobalInteraction()">
+
+    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
+    <audio id="snd-hover" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" preload="auto"></audio>
+    <audio id="snd-exit" src="https://assets.mixkit.co/active_storage/sfx/135/135-preview.mp3" preload="auto"></audio>
+
+    <div id="pre-load">
+        <div class="load-counter">00</div>
+        <div class="load-bar-wrap"><div class="load-bar-fill"></div></div>
+    </div>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-outline"></div>
+
+    <header>
+        <div class="nav-island" id="nav-island">
+            <a href="#home" class="nav-item active hover-item">INDEX</a>
+            <a href="#about" class="nav-item hover-item">ABOUT</a>
+            <a href="#work" class="nav-item hover-item">MODULES</a>
+            <a href="#contact" class="nav-item hover-item">CONNECT</a>
+        </div>
+    </header>
+
+    <div id="canvas-container"><canvas id="canvas"></canvas></div>
+
+    <section class="hero" id="home"><h1 class="slogan">YASHLOK<br>SINGH</h1></section>
+
+    <section id="about">
+        <div class="about-grid">
+            <div class="about-text">
+                <h2>CRAFTING FLUIDITY.</h2>
+                <p style="color:#888; margin: 20px 0;">Developer specializing in interactive 3D systems and high-fidelity interfaces.</p>
+                <a href="#" class="resume-btn hover-item" id="dl-cv"><span>DOWNLOAD CV</span></a>
+            </div>
+            <div style="background:var(--glass); padding:40px; border-radius:30px; border:1px solid var(--border)">
+                <h3>2025 STACK</h3>
+                <p style="opacity:0.5; font-size:0.8rem; margin-top:10px">Three.js • WebGL • React • Python • GSAP</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="work">
+        <h2 style="margin-bottom:40px">8 ACTIVE MODULES</h2>
+        <div class="grid">
+            <div class="card hover-item" onclick="openApp('calc')"><h3>CALCULATOR</h3><p>Full Scientific</p></div>
+            <div class="card hover-item" onclick="openApp('paint')"><h3>PAINT PAD</h3><p>Canvas Draw</p></div>
+            <div class="card hover-item" onclick="openApp('pass')"><h3>SECURE</h3><p>Password Gen</p></div>
+            <div class="card hover-item" onclick="openApp('todo')"><h3>TASKS</h3><p>Management</p></div>
+            <div class="card hover-item" onclick="openApp('palette')"><h3>COLOR</h3><p>Harmony Gen</p></div>
+            <div class="card hover-item" onclick="openApp('clock')"><h3>CHRONO</h3><p>Live Time</p></div>
+            <div class="card hover-item" onclick="openApp('weather')"><h3>WEATHER</h3><p>UI Concept</p></div>
+            <div class="card hover-item" onclick="openApp('conv')"><h3>CONVERT</h3><p>Unit Logic</p></div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div style="background:var(--glass); padding:60px; border-radius:40px; border:1px solid var(--border); text-align:center">
+            <button class="app-btn hover-item" style="width:200px" onclick="window.open('https://wa.me/7080853180')">WHATSAPP</button>
+        </div>
+    </section>
+
+    <div id="modal-container" class="modal" onclick="closeApp(event)">
+        <div id="app-calc" class="modal-content app-ui" style="display:none;">
+            <input type="text" id="calc-screen" value="0" readonly>
+            <div class="calc-grid">
+                <button class="c-btn" onclick="calc('C')">AC</button><button class="c-btn" onclick="calc('(')">(</button><button class="c-btn" onclick="calc(')')">)</button><button class="c-btn op" onclick="calc('/')">/</button>
+                <button class="c-btn" onclick="calc('7')">7</button><button class="c-btn" onclick="calc('8')">8</button><button class="c-btn" onclick="calc('9')">9</button><button class="c-btn op" onclick="calc('*')">*</button>
+                <button class="c-btn" onclick="calc('4')">4</button><button class="c-btn" onclick="calc('5')">5</button><button class="c-btn" onclick="calc('6')">6</button><button class="c-btn op" onclick="calc('-')">-</button>
+                <button class="c-btn" onclick="calc('1')">1</button><button class="c-btn" onclick="calc('2')">2</button><button class="c-btn" onclick="calc('3')">3</button><button class="c-btn op" onclick="calc('+')">+</button>
+                <button class="c-btn" style="grid-column: span 2; border-radius:50px;" onclick="calc('0')">0</button><button class="c-btn" onclick="calc('.')">.</button><button class="c-btn op" onclick="calc('=')">=</button>
+            </div>
+        </div>
+        <div id="app-paint" class="modal-content app-ui" style="display:none;">
+            <canvas id="paint-canvas" width="340" height="300" style="background:#fff; border-radius:10px"></canvas>
+            <button class="app-btn" onclick="clearP()">CLEAR</button>
+        </div>
+        <div id="app-pass" class="modal-content app-ui" style="display:none;"><h2 id="p-out">********</h2><button class="app-btn" onclick="genP()">GENERATE</button></div>
+        <div id="app-clock" class="modal-content app-ui" style="display:none;"><h1 id="c-time" style="font-size:3rem">00:00:00</h1></div>
+    </div>
+
+    <script type="module">
+        import LiquidBackground from 'https://cdn.jsdelivr.net/npm/threejs-components@0.0.27/build/backgrounds/liquid1.min.js'
+        const app = LiquidBackground(document.getElementById('canvas'));
+        app.loadImage('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2000&auto=format&fit=crop');
+        app.liquidPlane.material.color.setHex(0x000000);
+        app.liquidPlane.uniforms.displacementScale.value = 8.0;
+
+        const playSnd = (id, vol = 0.2) => { const a = document.getElementById(id); a.volume = vol; a.currentTime = 0; a.play().catch(()=>{}); };
+
+        // LOADER
+        let count = 0;
+        const countInt = setInterval(() => {
+            count += Math.floor(Math.random() * 5) + 1;
+            if(count >= 100) { count = 100; clearInterval(countInt); playSnd('snd-exit', 0.4); setTimeout(() => document.getElementById('pre-load').classList.add('fade-out'), 600); }
+            document.querySelector('.load-counter').innerText = count.toString().padStart(2, '0');
+            document.querySelector('.load-bar-fill').style.width = count + '%';
+        }, 60);
+
+        // APPS
+        window.openApp = (id) => { document.getElementById('modal-container').classList.add('active'); document.querySelectorAll('.app-ui').forEach(u => u.style.display='none'); document.getElementById('app-'+id).style.display='block'; if(id==='paint') initP(); };
+        window.closeApp = (e) => { if(e.target.id === 'modal-container') e.target.classList.remove('active'); };
+        
+        window.calc = (b) => { 
+            let s = document.getElementById('calc-screen'); 
+            if(b==='C') s.value="0"; else if(b==='=') s.value=eval(s.value); else s.value=(s.value==="0")?b:s.value+b; 
+        };
+        
+        window.genP = () => { document.getElementById('p-out').innerText = Math.random().toString(36).slice(-10).toUpperCase(); };
+        
+        function initP() {
+            const c = document.getElementById('paint-canvas'), ctx = c.getContext('2d');
+            let draw = false;
+            c.onmousedown = () => draw = true; c.onmouseup = () => { draw = false; ctx.beginPath(); };
+            c.onmousemove = (e) => { if(!draw) return; ctx.lineWidth = 4; ctx.strokeStyle = "#000"; const r = c.getBoundingClientRect(); ctx.lineTo(e.clientX - r.left, e.clientY - r.top); ctx.stroke(); };
+        }
+        window.clearP = () => { const c = document.getElementById('paint-canvas'); c.getContext('2d').clearRect(0,0,c.width,c.height); };
+
+        setInterval(() => { if(document.getElementById('c-time')) document.getElementById('c-time').innerText = new Date().toLocaleTimeString(); }, 1000);
+
+        // INTERACTION
+        window.handleGlobalInteraction = () => { playSnd('snd-click', 0.2); app.liquidPlane.uniforms.displacementScale.value = 35.0; setTimeout(()=>app.liquidPlane.uniforms.displacementScale.value = 8.0, 400); };
+        const dot = document.getElementById('cursor-dot'), out = document.getElementById('cursor-outline');
+        let mX = 0, mY = 0, oX = 0, oY = 0;
+        window.onmousemove = (e) => { mX = e.clientX; mY = e.clientY; dot.style.left = mX+'px'; dot.style.top = mY+'px'; };
+        function anim() { oX += (mX - oX) * 0.15; oY += (mY - oY) * 0.15; out.style.left = oX+'px'; out.style.top = oY+'px'; requestAnimationFrame(anim); }
+        anim();
+
+        document.querySelectorAll('.hover-item, .nav-item').forEach(el => {
+            el.onmouseenter = () => { document.body.classList.add('hovering'); playSnd('snd-hover', 0.1); };
+            el.onmouseleave = () => document.body.classList.remove('hovering');
+        });
+        
+        const navIsland = document.getElementById('nav-island');
+        document.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 45, y = (window.innerHeight / 2 - e.pageY) / 45;
+            navIsland.style.transform = `translateX(${x}px) translateY(${y}px)`;
+        });
+    </script>
+</body>
+</html>
